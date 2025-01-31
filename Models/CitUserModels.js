@@ -1,6 +1,6 @@
 const mongoose=require("mongoose");
 
-mongoose.connect("mongodb+srv://gopeshwarkumark:gopeshwar_Cit8.0_2025@cluster0.w40wu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0/cit", {
+mongoose.connect(process.env.MODELS_MONGO_URL, {
 }).then(() => {
     console.log('Connected to DB');
 }).catch(err => {
