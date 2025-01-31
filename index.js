@@ -1,4 +1,6 @@
 const cluster = require('node:cluster');
+const env=require("dotenv")
+env.config()
 const os=require("os")
 const express=require("express");
 const cors=require("cors");
@@ -10,6 +12,7 @@ const citmodels=require("./Models/CitUserModels")
 
 const numCPUs=os.cpus().length
 // console.log(numCPUs)
+const port=process.env.PORT || 3000
 
 if(cluster.isPrimary) {
     // console.log(`Primary ${process.pid} is running`);
@@ -151,12 +154,12 @@ app.get("/users",async(req,res)=>{
     res.json(leaderboard);
 })
 
-app.listen(5000,()=>{
-    // console.log(`cit On 5000 Port ${process.pid}`)
+app.listen(port,()=>{
+    console.log(`cit running on port ${port}`)
 })
 
 }
 
-// nodemon start cit.js
+// nodemon start index.js
 // gopeshwarkumark@gmail.com
 // utkarsh@gmail.com
