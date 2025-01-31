@@ -156,7 +156,7 @@ app.get("/users",async(req,res)=>{
 })
 
 app.listen(port,()=>{
-    console.log(`cit running on port ${port}`)
+    console.log(`cit running on port`)
 })
 
 }
