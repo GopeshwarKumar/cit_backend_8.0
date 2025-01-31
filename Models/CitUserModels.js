@@ -1,10 +1,12 @@
 const mongoose=require("mongoose");
 
 mongoose.connect(process.env.MODELS_MONGO_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
 }).then(() => {
     console.log('Connected to DB');
 }).catch(err => {
-    console.log('DB connection error: ');
+    console.log('DB connection error: ', err);
 });
 
 let cituserSchema=new mongoose.Schema({
@@ -56,4 +58,3 @@ let cituserSchema=new mongoose.Schema({
 
 module.exports=mongoose.model("CitUser",cituserSchema)
 // mongodb://127.0.0.1:27017
-// mongodb+srv://gopeshwarkumark:<gopeshwar_Cit8.0_2025>@cluster0.w40wu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0/cit
