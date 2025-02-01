@@ -1,9 +1,6 @@
 const mongoose=require("mongoose");
 
-mongoose.connect(process.env.MODELS_MONGO_URL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-}).then(() => {
+mongoose.connect(process.env.MODELS_MONGO_URL).then(() => {
     console.log('Connected to DB');
 }).catch(err => {
     console.log('DB connection error: ', err);
