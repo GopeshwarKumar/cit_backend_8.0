@@ -54,8 +54,8 @@ app.post("/create",async (req,res)=>{
 // login user
 app.post("/login",async(req,res)=>{
     let createUser=await citmodels.findOne({"email":req.body.email})
-    console.log(createUser.candidatename)
-    console.log(createUser.email)
+    // console.log(createUser.candidatename)
+    // console.log(createUser.email)
     if(!createUser){
         return res.send({message:"User not registered"})
     }
