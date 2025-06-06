@@ -7,18 +7,18 @@ mongoose.connect(`${process.env.MODELS_MONGO_URL}/cit`).then(res => {
 });
 
 let cituserSchema=new mongoose.Schema({
-    candidatename:{
+    adminname:{
         type:String,
     },
-    email:{
+    adminemail:{
         type:String,
     },
-    pass:{
+    adminpassword:{
         type:String,
     },
     createdAt: { type: Date, default: Date.now },
     
 })
 
-module.exports=mongoose.model("CitUser",cituserSchema)
+module.exports=mongoose.model("Admin",cituserSchema)
 // mongodb://127.0.0.1:27017

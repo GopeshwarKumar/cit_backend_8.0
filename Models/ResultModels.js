@@ -1,6 +1,14 @@
 const mongoose=require("mongoose");
 
+mongoose.createConnection(`${process.env.MODELS_MONGO_URL}/cit`)
+
 const testSchema=new mongoose.Schema({
+    name:{
+        type:String,
+    },
+    email:{
+        type:String,
+    },
     Answer1:{
         type:String,
     },
@@ -25,9 +33,76 @@ const testSchema=new mongoose.Schema({
     Answer8:{
         type:String,
     },
+    Answer9:{
+        type:String,
+    },
+    Answer10:{
+        type:String,
+    },
+    Answer11:{
+        type:String,
+    },
+    Answer12:{
+        type:String,
+    },
+    Answer13:{
+        type:String,
+    },
+    Answer14:{
+        type:String,
+    },
+    Answer15:{
+        type:String,
+    },
+    Answer16:{
+        type:String,
+    },
+    Answer17:{
+        type:String,
+    },
+    Answer18:{
+        type:String,
+    },
+    Answer19:{
+        type:String,
+    },
+    Answer20:{
+        type:String,
+    },
+    Answer21:{
+        type:String,
+    },
+    Answer22:{
+        type:String,
+    },
+    Answer23:{
+        type:String,
+    },
+    Answer24:{
+        type:String,
+    },
+    Answer25:{
+        type:String,
+    },
+    Answer26:{
+        type:String,
+    },
+    Answer27:{
+        type:String,
+    },
+    Answer28:{
+        type:String,
+    },
+    Answer29:{
+        type:String,
+    },
+    Answer30:{
+        type:String,
+    },
+    score:{
+        type:String,
+    },
     createdAt: { type: Date, default: Date.now },
 })
 
-module.exports=mongoose.model("citUsersResult",testSchema)
-// const testSch=mongoose.model("citUsersResult",testSchema)
-// module.exports=testSch
+module.exports=mongoose.model("citResult",testSchema)

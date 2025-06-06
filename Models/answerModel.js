@@ -6,19 +6,19 @@ mongoose.connect(`${process.env.MODELS_MONGO_URL}/cit`).then(res => {
     console.log('DB connection error: ');
 });
 
-let cituserSchema=new mongoose.Schema({
-    candidatename:{
-        type:String,
+let answerSchema=new mongoose.Schema({
+    userName:{
+        type: String,
     },
-    email:{
-        type:String,
+    userEmail:{
+        type: String,
     },
-    pass:{
-        type:String,
+    answers:{
+        type: Object,
     },
     createdAt: { type: Date, default: Date.now },
     
 })
 
-module.exports=mongoose.model("CitUser",cituserSchema)
+module.exports=mongoose.model("answer",answerSchema)
 // mongodb://127.0.0.1:27017
