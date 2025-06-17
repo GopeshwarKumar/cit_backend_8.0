@@ -1,6 +1,6 @@
 const mongoose=require("mongoose");
 
-mongoose.createConnection(`${process.env.MODELS_MONGO_URL}/cit`)
+mongoose.connect(`${process.env.MODELS_MONGO_URL}/cit`)
 
 const testSchema=new mongoose.Schema({
     name:{

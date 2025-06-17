@@ -1,10 +1,6 @@
 const mongoose=require("mongoose")
 
-mongoose.connect(`${process.env.MODELS_MONGO_URL}/cit`).then(res => {
-    console.log('Connected to DB')
-}).catch(err => {
-    console.log('DB connection error: ');
-});
+mongoose.connect(`${process.env.MODELS_MONGO_URL}/cit`)
 
 let answerSchema=new mongoose.Schema({
     userName:{
