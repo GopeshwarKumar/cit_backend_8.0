@@ -233,11 +233,41 @@ app.post('/checkuser',async(req,res)=>{
 })
 
 // show users
-app.get("/userscore",async(req,res)=>{
-    // const leaderboard=await citResult.find({})
-    const leaderboard=await answermodel.find({})
-    res.send(leaderboard)
-})
+app.get("/userscore", async (req, res) => {
+  try {
+    const leaderboard = await answermodel.find({});
+
+    const correctAnswers = {
+      "1": "physics",
+      "3": "physical",
+      "4": "Africa",
+      "5": "Niece",
+      "6": "No"
+    };
+
+    const result = leaderboard.map(user => {
+      const answers = Array.isArray(user.answers) ? user.answers[0] : user.answers;
+      let marks = 0;
+
+      for (let key in correctAnswers) {
+        if (answers[key] && answers[key].toLowerCase() === correctAnswers[key].toLowerCase()) {
+          marks += 4;
+        }
+      }
+
+      return {
+        name: user.userName,
+        email: user.userEmail,
+        mark: marks
+      };
+    });
+
+    res.send(result);  // ✅ send the final array of scores once
+  } catch (error) {
+    console.error("Error calculating scores:", error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+});
 
 
 app.listen(port,()=>{
