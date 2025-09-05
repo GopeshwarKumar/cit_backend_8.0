@@ -18,6 +18,9 @@ let questionSchema=new mongoose.Schema({
     option4:{
         type:String,
     },
+    questionImage:{
+        type:String,
+    },
     answer:{
         type:String,
     },

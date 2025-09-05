@@ -12,6 +12,16 @@ let cituserSchema=new mongoose.Schema({
     pass:{
         type:String,
     },
+    token:{
+        type:String,
+    },
+    otp:{
+        type:Number,
+    },
+    userType:{
+        type:String,
+        default:"Unverified"
+    },
     createdAt: { type: Date, default: Date.now },
     
 })
