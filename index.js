@@ -336,7 +336,10 @@ app.post('/createquestion',async(req,res)=>{
 // delete question
 app.post('/deletequestion',async(req,res)=>{
     const deletequestion=await questionmodel.findOneAndDelete({"question1":req.body.deletequestion})
-    res.send({message:"Deleted"})
+    if(!deletequestion){
+        return res.send({message:"Error !"})
+    }
+    res.send({message:"Question Deleted"})
 })
 
 // save answers
