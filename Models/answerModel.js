@@ -12,6 +12,13 @@ let answerSchema=new mongoose.Schema({
     answers:{
         type: Object,
     },
+    userType:{
+        type:String,
+        default:"Appeared"
+    },
+    marks:{
+        type:Number,
+    },
     createdAt: { type: Date, default: Date.now },
     
 })

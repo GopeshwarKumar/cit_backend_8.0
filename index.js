@@ -30,6 +30,7 @@ const io = new Server(httpServer, {
   }
 });
 
+// socket connection
 io.on("connection", (socket) =>{
     // console.log(`Id:- ${socket.id}`)
 
@@ -62,71 +63,64 @@ if(cluster.isPrimary) {
 
 app.use(express.json()); // for POST requests
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
+app.use(cors({
+    origin:"http://localhost:3000",
+    credentials:true
+}));
 app.use(cookieparser())
 
 
 const verifyToken = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
+    // console.log("verify_Token",req.cookies.usertoken)
+    const usertoken=req.cookies.usertoken
+    if(usertoken){
+        jwt.verify(usertoken,'secretKey',(error,decoded)=>{
+        if(error){
+            res.send({message:'invalid token'})
+        }
+        // res.send({success:true})
+        next();
+    })
     
-    // Check if Authorization header is present and starts with "Bearer "
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(403).send({ message: "No token provided" });
+}else{
+    return res.send({ message: 'No token provided' });
+}
     }
 
-    const token = authHeader.split(' ')[1];
-
-    try {
-        const decoded = jwt.verify(token, 'your_secret_key'); // Use your env var in production
-        req.user = decoded; // Attach decoded token payload to the request
-        next(); // Proceed to the next middleware or route
-    } catch (err) {
-        return res.status(401).send({ message: "Invalid token" });
-    }
-};
 
 
-app.get("/", (req,res)=>{
+app.get("/", verifyToken,(req,res)=>{
     res.send({message:`Gopeshwar kumar ${process.pid} is running`})
 })
 
 
-// User Profile
-app.get('/profile', verifyToken, async (req, res) => {
-    try {
-        const userId = req.user.id;
-
-        const user = await citmodels.findById(userId).select('-pass'); // Exclude password
-        if (!user) {
-            return res.status(404).send({ message: "User not found" });
-        }
-
-        res.status(200).send({ user });
-    } catch (err) {
-        console.error("Error in /profile:", err);
-        res.status(500).send({ message: "Internal server error" });
-    }
-});
-
-
 // create user 
 app.post("/create",async (req,res)=>{
-    let createUser=await citmodels.findOne({"email":req.body.email})
+    let createUser=await citmodels.findOne({"email":req.body.email})    
+    // const Id = createUser._id.toString();
+
     if(createUser){
         return res.send({message:"Email exists"})
     }
     // hash the password
     const hashpassword=await bcrypt.hash(req.body.pass , 12)
     // Create JWT token
-    const usertoken=jwt.sign({id:'kjhkjhkjnk'},'payload',{expiresIn:3600*24})
+    const usertoken=jwt.sign({id:'hsjjxkksksl'},'secretKey',{expiresIn:'1d'})
     // save the data
-    const user=citmodels({"candidatename":req.body.candidatename,"email":req.body.email,"pass":hashpassword,
-"token":usertoken,"otp":req.body.otp})
+    const user=citmodels({"candidatename":req.body.candidatename,"email":req.body.email,"pass":hashpassword,"otp":req.body.otp})
     await user.save().then(ress =>{
-        res.send({message:"Registered successfully"})
+    
+        // set the cookies
+    // res.cookie('usertoken', usertoken, {
+    // httpOnly: true,
+    // secure: false,
+    // maxAge: 3600000,});
+
+    res.send({message:"Registered successfully",usertoken})
     }).catch(err =>{
         res.send({message:"Failed! try again"})
     })
+    
 
     // Create a transporter using your email
 let transporter = nodemailer.createTransport({
@@ -216,14 +210,19 @@ app.post("/login",async(req,res)=>{
         return res.send({message:"Wrong password"})
     }
     
-        const token = jwt.sign(
-            { id:'jkhjkhsjh'},  // payload
-            'your_secret_key',                               // secret key (replace with env variable in production)
-            { expiresIn: 3600 }                               // optional: token expiry
+        const usertoken = jwt.sign(
+            { id:'hsjjxkksksl'},  // payload
+            'secretKey',                               // secret key (replace with env variable in production)
+            { expiresIn: '1d' }                               // optional: token expiry
         );
 
-    res.send({message:"User loggedIn" , usertoken:token,name:createUser.candidatename,email:createUser.email})
+    res.send({message:"User loggedIn" , usertoken,name:createUser.candidatename,email:createUser.email})
 })
+
+// User profile
+// app.get('/userprofile',async(req,res)=>{
+    
+// })
 
 // forgotpassword
 app.post("/forgotpassword",async(req,res)=>{
@@ -282,8 +281,6 @@ app.post("/newpassword", async(req,res)=>{
     })
 })
 
-
-
 // admin create user 
 app.post("/admincreate",async (req,res)=>{
     let createadmin=await admin.findOne({"adminemail":req.body.adminemail})
@@ -336,35 +333,119 @@ app.post('/createquestion',async(req,res)=>{
 // delete question
 app.post('/deletequestion',async(req,res)=>{
     const deletequestion=await questionmodel.findOneAndDelete({"question1":req.body.deletequestion})
-    res.send({message:"Deleted"})
+    console.log(req.body)
+    if(!deletequestion){
+        return res.send({message:"Question not found !"})
+    }
+    res.send({message:"Question Deleted"})
+})
+
+// Update Question
+app.post('/updatequestion', async (req, res) =>{
+    const updateQuestion=await questionmodel.findById(req.body.QuestionId)
+
+    if(updateQuestion){
+        await updateQuestion.updateOne(req.body).then(res=>{
+        res.send({messsage:'Question updated'})
+    }).catch(err=>{
+        res.send({messsage:'error'})
+    })
+}else{
+    return res.send({messsage:'Question not found'})
+}
+    
+})
+
+// User Appeared Test
+// app.post('/appeared',async(req,res)=>{
+//     const existedAnswer=await answermodel.findOne({"userEmail":req.body.userEmail})
+//     if(existedAnswer){
+//         return res.send("User Appeared for test")
+//     }
+//     const appear=answermodel({"userEmail":req.body.userEmail,"userName":req.body.userName})
+//     await appear.save().then(res=>{
+//         res.send("Info Saved")
+//     }).catch(err=>{
+//         res.send("Error info saving !")
+//     })
+// })
+
+// check user that test appeared or not
+app.post('/checkuser',async(req,res)=>{
+    const checkUser=await answermodel.findOne({"userEmail":req.body.userEmail })
+    // console.log(req.cookies.usertoken)
+
+    if(checkUser){
+        res.send({message:"User has appeared for test !"})
+    }else{
+        res.send({message:"User has not appeared for test !"})
+    }
 })
 
 // save answers
 app.post('/saveanswers',async(req,res)=>{
-    const answe=new answermodel(req.body)
+    const correctAnswers = {
+  "0": "gjygy",
+  "1": "kbjhbj",
+  "2": "jhjg",
+  "3": "hgchf",
+  "4": "kjbkuh",
+  "5": "jkbhkjh",
+  "6": "dgvjs",
+  "7": "kyui",
+  "8": "hggbuk",
+  "9": "juhugh",
+  "10": "mbmxkj",
+  "11": "m897987",
+  "12": "hggbuk",
+  "13": "khk",
+  "14": "rajya",
+  "15": "nepal",
+  "16": "delhi",
+  "17": "water",
+  "18": "death",
+  "19": "ground",
+  "20": "wise",
+};
+const { answers, userName, userEmail } = req.body;
     const existedAnswer=await answermodel.findOne({"userEmail":req.body.userEmail})
     if(existedAnswer){
-        return res.send({message:"Answer already saved !"})
+       return res.send({message:"Answer already saved !"})
     }
-    await answe.save().then(result =>{
-        res.send({message:"Answer saved"})
-    }).catch(er=>{
-        res.status(403).send({message:"Error found !"})
-    })
-})
+    // 2. Calculate marks
+    let marks = 0;
+    for (let key in correctAnswers) {
+      const givenAnswer = answers[key];
+      const correctAnswer = correctAnswers[key];
+
+      if (
+        givenAnswer &&
+        givenAnswer.toString().trim().toLowerCase() ===
+          correctAnswer.toString().trim().toLowerCase()
+      ) {
+        marks += 4;
+      }
+    }
+
+    // 3. Save new answer doc with userType Completed
+    const newAnswer = new answermodel({
+      userName,
+      userEmail,
+      answers,
+      marks,
+      userType: "Completed",
+    });
+
+    await newAnswer.save();
+
+    // 4. Return success
+    return res.status(200).send({ message: "Answer saved"});
+  })
 
 // getandshowquestion
 app.get('/getandshowquestion',async(req,res)=>{
     const allQuestions=await questionmodel.find({})
     res.send(allQuestions)
-})
-
-// check user that test appeared or not
-app.post('/checkuser',async(req,res)=>{
-    const checkUser=await answermodel.findOne({"userEmail":req.body.userEmail})
-    if(checkUser){
-        return res.send({message:"User has appeared for test !"})
-    }
 })
 
 // cit user test result
@@ -384,44 +465,43 @@ app.post('/checkuser',async(req,res)=>{
 
 // show users
 app.get("/userscore", async (req, res) => {
-  try {
-    const leaderboard = await answermodel.find({});
+//   try {
+//     const leaderboard = await answermodel.find({});
 
-    const correctAnswers = {
-      "1": "physics",
-      "3": "physical",
-      "4": "Africa",
-      "5": "Niece",
-      "6": "No"
-    };
+//     const correctAnswers = {
+//       "1": "gjygy",
+//       "3": "physical",
+//       "4": "Africa",
+//       "5": "Niece",
+//       "6": "No"
+//     };
 
-    const result = leaderboard.map(user => {
-      const answers = Array.isArray(user.answers) ? user.answers[0] : user.answers;
-      let marks = 0;
+//     const result = leaderboard.map(user => {
+//       const answers = Array.isArray(user.answers) ? user.answers[0] : user.answers;
+//       let marks = 0;
 
-      for (let key in correctAnswers) {
-        if (answers[key] && answers[key].toLowerCase() === correctAnswers[key].toLowerCase()) {
-          marks += 4;
-        }
-      }
+//       for (let key in correctAnswers) {
+//         if (answers[key] && answers[key].toLowerCase() === correctAnswers[key].toLowerCase()) {
+//           marks += 4;
+//         }
+//       }
 
-      return {
-        name: user.userName,
-        email: user.userEmail,
-        mark: marks
-      };
-    });
+//       return {
+//         name: user.userName,
+//         email: user.userEmail,
+//         mark: marks
+//       };
+//     });
 
-    res.send(result)
-  } catch (error) {
-    console.error("Error calculating scores:", error);
-    res.status(500).send({ error: "Internal Server Error" });
-  }
+//     res.send(result)
+//   } catch (error) {
+//     console.error("Error calculating scores:", error);
+//     res.status(500).send({ error: "Internal Server Error" });
+//   }
+
+const leaderboard = await answermodel.find({});
+res.send(leaderboard)
 });
-
-
-
-
 
 httpServer.listen(port,()=>{
     console.log(`cit running on ${port}`)
